@@ -1,24 +1,20 @@
 from multiprocessing import Process, Value, Array, Queue
 from time import sleep
 
-workingProcessID = "0"
+workingProcessID = Value('d',0)
 queue = Queue()
 allProcesses = []
 
 class MyProcess:
     def __init__(self,id):
-        self.id = id
+        self.id = Value('d',id)
         self.process = Process()
 
-def add(num, value,pr):
-    global workingProcessID
-    global allProcesses
-    global queue
-    
+def add(num, value,pr,workingProcessID,allProcesses,queue):
     tmp = 0
     while True:
-        if workingProcessID == "0" or workingProcessID == pr :
-            workingProcessID = pr
+        if workingProcessID.value == 0 or workingProcessID.value == pr :
+            workingProcessID.value = pr
         else:
             for p in allProcesses:
                 if(pr == p.id) :
@@ -33,20 +29,16 @@ def add(num, value,pr):
         if tmp != num.value:
             print("Process conflict1")
             
-        workingProcessID = "0" 
+        workingProcessID.value = 0 
         if not queue.empty() :
             newQr = queue.pop()
             newQr.start()
 
-def sub(num, value,pr):
-    global workingProcessID
-    global allProcesses
-    global queue
-                
+def sub(num, value,pr,workingProcessID,allProcesses,queue):
     tmp = 0
     while True:
-        if workingProcessID == "0" or workingProcessID == pr:
-            workingProcessID = pr
+        if workingProcessID.value == 0 or workingProcessID.value == pr:
+            workingProcessID.value = pr
         else:
             for p in allProcesses:
                 if(pr == p.id) :
@@ -61,20 +53,16 @@ def sub(num, value,pr):
         if tmp != num.value:
             print("Process conflict2")
             
-        workingProcessID = "0" 
+        workingProcessID.value = 0 
         if not queue.empty() :
             newQr = queue.pop()
             newQr.start()
 
-def mul(num, value,pr):
-    global workingProcessID
-    global allProcesses
-    global queue
-                
+def mul(num, value,pr,workingProcessID,allProcesses,queue):            
     tmp = 0
     while True:
-        if workingProcessID == "0" or workingProcessID == pr:
-            workingProcessID = pr
+        if workingProcessID.value == 0 or workingProcessID.value == pr:
+            workingProcessID.value = pr
         else:
             for p in allProcesses:
                 if(pr == p.id) :
@@ -89,20 +77,16 @@ def mul(num, value,pr):
         if tmp != num.value:
             print("Process conflict3")
             
-        workingProcessID = "0" 
+        workingProcessID.value = 0 
         if not queue.empty() :
             newQr = queue.pop()
             newQr.start()
 
-def div(num, value,pr):
-    global workingProcessID
-    global allProcesses
-    global queue
-    
+def div(num, value,pr,workingProcessID,allProcesses,queue):
     tmp = 0
     while True:
-        if workingProcessID == "0" or workingProcessID == pr:
-            workingProcessID = pr
+        if workingProcessID.value == 0 or workingProcessID.value == pr:
+            workingProcessID.value = pr
         else:
             for p in allProcesses:
                 if(pr == p.id) :
@@ -117,19 +101,15 @@ def div(num, value,pr):
         if tmp != num.value:
             print("Process conflict4")
             
-        workingProcessID = "0"       
+        workingProcessID.value = 0       
         if not queue.empty() :
             newQr = queue.pop()
             newQr.start()
 
-def Show(num,pr):
-    global workingProcessID
-    global allProcesses
-    global queue
-                
+def Show(num,pr,workingProcessID,allProcesses,queue):        
     while True:
-        if workingProcessID == "0" or workingProcessID == pr:
-            workingProcessID = pr
+        if workingProcessID.value == 0 or workingProcessID.value == pr:
+            workingProcessID.value = pr
         else:
             for p in allProcesses:
                 if(pr == p.id) :
@@ -137,7 +117,7 @@ def Show(num,pr):
                     queue.put(p)
         sleep(0.5)
         print(num.value)
-        workingProcessID = "0"   
+        workingProcessID.value = 0   
         if not queue.empty() :
             newQr = queue.pop()
             newQr.start()
@@ -149,17 +129,17 @@ if __name__ == '__main__':
 
     arr = Array('i', range(2))
     
-    p1 = MyProcess("p1")
-    p2 = MyProcess("p2")
-    p3 = MyProcess("p3")
-    p4 = MyProcess("p4")
-    show = MyProcess("show")
+    p1 = MyProcess(1)
+    p2 = MyProcess(2)
+    p3 = MyProcess(3)
+    p4 = MyProcess(4)
+    show = MyProcess(5)
     
-    p1.process = Process(target=add, args=(num, 10,p1.id))
-    p2.process = Process(target=sub, args=(num, 5,p2.id))
-    p3.process = Process(target=mul, args=(num, 2,p3.id))
-    p4.process = Process(target=div, args=(num, 4,p4.id))
-    show.process = Process(target=Show, args=(num,show.id))
+    p1.process = Process(target=add, args=(num, 10,p1.id.value,workingProcessID,allProcesses,queue))
+    p2.process = Process(target=sub, args=(num, 5,p2.id.value,workingProcessID,allProcesses,queue))
+    p3.process = Process(target=mul, args=(num, 2,p3.id.value,workingProcessID,allProcesses,queue))
+    p4.process = Process(target=div, args=(num, 4,p4.id.value,workingProcessID,allProcesses,queue))
+    show.process = Process(target=Show, args=(num,show.id.value,workingProcessID,allProcesses,queue))
     
     allProcesses = [p1,p2,p3,p4,show]
     
